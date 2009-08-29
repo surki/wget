@@ -1219,9 +1219,15 @@ get_grouping_data (const char **sep, const char **grouping)
   if (!initialized)
     {
       /* Get the grouping info from the locale. */
+#ifdef ANDROID_CHANGES
+      cached_sep = ".";
+      cached_grouping = "";
+#else
       struct lconv *lconv = localeconv ();
       cached_sep = lconv->thousands_sep;
       cached_grouping = lconv->grouping;
+#endif
+
 #if ! USE_NLS_PROGRESS_BAR
       /* We can't count column widths, so ensure that the separator
        * is single-byte only (let check below determine what byte). */
@@ -1235,10 +1241,14 @@ get_grouping_data (const char **sep, const char **grouping)
              In those locales set the sep char to ',', unless that
              character is used for decimal point, in which case set it
              to ".".  */
+#ifndef ANDROID_CHANGES
           if (*lconv->decimal_point != ',')
             cached_sep = ",";
           else
             cached_sep = ".";
+#else
+          cached_sep = ",";
+#endif
           cached_grouping = "\x03";
         }
       initialized = true;
